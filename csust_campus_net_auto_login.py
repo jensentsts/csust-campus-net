@@ -12,7 +12,7 @@ from csust_campus_net_instructions import instructions
 # 设置
 test_url = 'https://www.baidu.com/'  # 测试网络连接的url
 test_label = 'About Baidu'  # 对url获取内容的辨识字符，如果存在test_label，证明链接成功
-test_delay = 10  # 检测网络状态延迟（秒）
+test_delay = 20  # 检测网络状态延迟（秒）
 show_device_data = False  # 显示设备信息
 
 
@@ -43,7 +43,7 @@ def wifi_connect(user: User, iface: pywifi.wifi.Interface):
     profile.akm.append(pywifi.const.AKM_TYPE_NONE)
 
     iface.disconnect()
-    iface.remove_all_network_profiles()
+    # iface.remove_all_network_profiles()  # 使用后会清空wifi密码！！！
     tmp_profile = iface.add_network_profile(profile)
     iface.connect(tmp_profile)
 
