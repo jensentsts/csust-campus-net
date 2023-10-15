@@ -1,5 +1,5 @@
 # 长沙理工大学校园网自动登录器
-本项目基于![https://github.com/linfangzhi/CSUST_network_auto_login/tree/master](https://github.com/linfangzhi/CSUST_network_auto_login/tree/master)二次开发，联网成功后会再次提示本项目的开源信息。感谢学长的项目，学弟在研究过程中省了不少麻烦。
+本项目基于[https://github.com/linfangzhi/CSUST_network_auto_login/tree/master](https://github.com/linfangzhi/CSUST_network_auto_login/tree/master)二次开发，联网成功后会再次提示本项目的开源信息。感谢学长的项目，学弟在研究过程中省了不少麻烦。
 ## 使用
 首先要保证你拥有校园网。
 通过`csust_campus_net_user_editor`，将**账号**、**密码**、**所对应的校园网**、**用户名**（即为前面三个起名），生成`campus_users_data.json`（TODO: 这个文件名会改），然后启动`csust_campus_net_auto_login`，你就可以在长理网上冲浪了。
