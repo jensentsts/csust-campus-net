@@ -1,10 +1,29 @@
 # 长沙理工大学校园网自动登录器
 本项目基于[https://github.com/linfangzhi/CSUST_network_auto_login/tree/master](https://github.com/linfangzhi/CSUST_network_auto_login/tree/master)二次开发，联网成功后会再次提示本项目的开源信息。感谢学长的项目，学弟在研究过程中省了不少麻烦。
 
-## 使用
+此工具旨在让电脑一劳永逸地连接校园网。
+
+## 初次使用
 首先要保证你拥有校园网。
 
-通过`csust_campus_net_user_editor`，将**账号**、**密码**、**所对应的校园网**、**用户名**（即为前面三个起名），生成`campus_users_data.json`（TODO: 这个文件名会改），然后启动`csust_campus_net_auto_login`，你就可以在长理网上冲浪了。
+接着，你需要保证软件同目录下有用户数据文件`csust_campus_net_user_data.xlsx`，你可以参考[用户数据文件](#用户数据文件)中的说明编辑它。
+
+确保wifi处于打开状态，启动后，软件会读取用户数据，并连接到相应的校园网热点上。
+
+### 用户数据文件
+默认的用户数据文件路径是软件所在目录下的`csust_campus_net_user_data.xlsx`。
+
+你可以自行创建用户数据文件，也可以在首次启动软件`csust_campus_net_auto_login`后，打开软件自动创建的用户数据文件。请在文件里写入用户数据并保存，例如：
+
+| 用户名 | 账号 | 密码 | ssid |
+| :---: | :---: | :---: | :---:|
+| test | 202xyyyyzzzz | 123456 | csust-yd |
+
+*ssid：就是wifi名，例如csust-yd、csust-dx、csust-lt、csust-bg等*
+
+写入用户数据后，才可以连接到网络。
+
+用户数据文件的路径在`csust_campus_net_user.py`中，你可以在这里更改它。
 
 ## 特点
 
@@ -25,6 +44,13 @@
 尝试连接任务完成后，此工具会询问是否要继续运行以持续监测网络连接状况。如果出现无法上网的情况，此工具将会重新开始前面的连接、登录、验证连接状态的步骤。
 
 ## 其它
-- 支持检测账号密码正误。
 - 理论上支持三大运营商的校园网自动登录，实际上目前只测试了csust-yd、csust-dx的，csust-lt和csust-bg两个网络尚未测试。
 - 自测稳定，不确定其他状况下是否能正常运行。
+
+## todos
+- 账号密码正误消息提示。
+- 使用体验优化
+- 优化说明文件
+- 自动注册windows服务并隐藏到后台
+- release一个打包后的文件
+- 简单的可视化（待定）
