@@ -10,3 +10,5 @@ def instructions():
     print(Fore.LIGHTWHITE_EX + 'INFO:',
           Fore.RESET + '本项目开源发布于',
           Fore.LIGHTBLUE_EX + 'https://github.com/jensentsts/csust-campus-net')
+    print(Fore.LIGHTWHITE_EX + 'INFO:',
+          Fore.RESET + '遵从开源协议: CC4.0 BY-NC-SA')
