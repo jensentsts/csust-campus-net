@@ -1,6 +1,6 @@
 import pandas as pd
 
-user_data_path = './csust_campus_net_user_data.xlsx'
+user_data_path = r'.\csust_campus_net_user_data.xlsx'
 
 
 # 用户类
