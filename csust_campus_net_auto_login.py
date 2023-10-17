@@ -1,6 +1,6 @@
 import re
-import sys
 import time
+import os
 
 import pywifi
 import requests
@@ -245,6 +245,7 @@ def login() -> bool:
               Fore.LIGHTYELLOW_EX + user_data_path,
               Fore.RESET + '中添加用户信息.')
         sys.stdout.flush()
+        os.startfile(user_data_path)
         return is_network_ok(info=True)
     else:
         for user_data in users:
@@ -263,13 +264,8 @@ def login() -> bool:
 # 启动!
 if __name__ == '__main__':
     init(autoreset=True)
-    print(Fore.LIGHTYELLOW_EX + 'WARNING:',
-          Fore.RESET + '使用前请先暂时断开VPN，否则很可能无法登录校园网；若登录始终失败多系上次关机前未断开VPN连接，请打开梯子并重新关闭其连接功能。成功登录后可继续正常使用.')
-    print(Fore.LIGHTYELLOW_EX + 'WARNING:',
-          Fore.RESET + '可在文件',
-          Fore.LIGHTYELLOW_EX + sys.path[0] + user_data_path[1:-1],
-          Fore.RESET + '中编辑用户信息.')
     sys.stdout.flush()
+    instructions()
     keep_inspecting = False  # 是否要持续监测网络连接状态
     while True:
         # 自动登录
@@ -278,7 +274,6 @@ if __name__ == '__main__':
                     Fore.LIGHTWHITE_EX + 'INFO:' + Fore.RESET + ' 网络连接失败，是否尝试重新连接? (y or any): ').lower():
                 continue  # 重新login
             break  # 退出
-        instructions()
         # 检测网络状态
         if keep_inspecting or 'y' in input(
                 Fore.LIGHTWHITE_EX + 'INFO:' + Fore.RESET + ' 是否持续检测网络连接状态? (y or any): ').lower():

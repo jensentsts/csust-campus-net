@@ -1,6 +1,8 @@
 import pandas as pd
+import sys
 
-user_data_path = r'.\csust_campus_net_user_data.xlsx'
+
+user_data_path = sys.path[0] + r'\csust_campus_net_user_data.xlsx'
 
 
 # 用户类
@@ -37,15 +39,14 @@ def load_users_data(path: str) -> list[User]:
         empty_data = {'用户名': [], '账号': [], '密码': [], 'ssid': []}
         df = pd.DataFrame(empty_data)
         df.to_excel(path)
-    else:
-        sheet = pd.read_excel(path, sheet_name=0)
-        username = sheet['用户名']
-        account = sheet['账号']
-        password = sheet['密码']
-        campus_net_ssid = sheet['ssid']
-        for i in range(0, len(username)):
-            data += [dict(username=username[i], account=account[i], password=password[i],
-                          campus_net_ssid=campus_net_ssid[i])]
+    sheet = pd.read_excel(path, sheet_name=0)
+    username = sheet['用户名']
+    account = sheet['账号']
+    password = sheet['密码']
+    campus_net_ssid = sheet['ssid']
+    for i in range(0, len(username)):
+        data += [dict(username=username[i], account=account[i], password=password[i],
+                      campus_net_ssid=campus_net_ssid[i])]
 
     users_list = []
     for i in data:
