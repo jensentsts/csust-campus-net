@@ -1,6 +1,6 @@
+# coding=utf-8
 import pandas as pd
 import sys
-
 
 user_data_path = sys.path[0] + r'\csust_campus_net_user_data.xlsx'
 
@@ -29,8 +29,9 @@ class User:
         self.password = data['password']
         self.campus_net_ssid = data['campus_net_ssid']
 
+
 # 读取用户数据
-def load_users_data(path: str) -> list[User]:
+def load_users_data(path=user_data_path) -> list[User]:
     data = []
     try:
         with open(path, mode='r', encoding='utf-8') as f:
