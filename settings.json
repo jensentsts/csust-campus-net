@@ -15,7 +15,7 @@
       "label": "About Baidu",
       "url": "https://www.baidu.com/"
     },
-    "timeout": 5,
+    "timeout": 3,
     "wlan_info_request_url": "http://1.1.1.1/?isReback=1"
   }
 }
