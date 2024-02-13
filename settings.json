@@ -1,0 +1,21 @@
+{
+  "log": {
+    "show_account": false,
+    "show_net_test_delay_bar": true,
+    "show_net_test_succession_info": false,
+    "show_password": false,
+    "show_wlan_info": true
+  },
+  "net": {
+    "auto_connection": false,
+    "login_url": "http://192.168.7.221:801/eportal/?c=ACSetting&a=Login&protocol=http:&hostname=192.168.7.221&iTermType=1&wlanuserip={wlanuserip}&wlanacip={wlanacip}&wlanacname={wlanacname}&mac={wlanusermac}&ip={wlanuserip}&enAdvert=0&queryACIP=0&loginMethod=1",
+    "logout_url": "http://192.168.7.221:801/eportal/?c=ACSetting&a=Logout&wlanuserip={wlanuserip}&wlanacip={wlanacip}&wlanacname={wlanacname}&port=&hostname=192.168.7.221&iTermType=1&session=&queryACIP=0&mac={wlanusermac}",
+    "test": {
+      "delay": 60,
+      "label": "bili",
+      "url": "https://www.bilibili.com/"
+    },
+    "timeout": 3,
+    "wlan_info_request_url": "http://1.1.1.1/?isReback=1"
+  }
+}
