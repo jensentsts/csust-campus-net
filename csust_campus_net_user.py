@@ -10,7 +10,6 @@ user_data_path = sys.path[0] + r'\csust_campus_net_user_data.xlsx'
 # 为什么 users_file_path 中保存了多个用户的数据：
 # - 在长理校园网抽风的时候，你可能需要借用一下同学的校园网
 # - 方便我做不同运营商网络连接的测试
-# - TODO: 制作可视化窗口
 class User:
     username: str
     account: str
