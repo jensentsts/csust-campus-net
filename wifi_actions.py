@@ -10,7 +10,7 @@ import subprocess
 
 def get_interfaces_data() -> list[dict]:
     wifi_list = []
-    cmd_output = subprocess.run(['netsh', 'wlan', 'show', 'interfaces'], check=True, text=True, capture_output=True).stdout
+    cmd_output = subprocess.run(['netsh', 'wlan', 'show', 'interfaces'], check=True, text=True, capture_output=True, encoding='gb18030', errors='ignore').stdout
 
     data = re.sub(r'系统上有 \d+ 个接口:\n', '', cmd_output)
     pattern = re.compile(r'\s*([^:\n]+)\s*:\s*([^:\n]+(?:\s*:\s*[^:\n]+)*)\s*\n')
@@ -30,7 +30,7 @@ def get_interfaces_data() -> list[dict]:
 
 def get_networks_data() -> list[dict]:
     network_list = []
-    cmd_output = subprocess.run(['netsh', 'wlan', 'show', 'networks'], check=True, text=True, capture_output=True).stdout
+    cmd_output = subprocess.run(['netsh', 'wlan', 'show', 'networks'], check=True, text=True, capture_output=True, encoding='gb18030', errors='ignore').stdout
 
     data = re.sub(r"当前有 \d+ 个网络可见。", '', cmd_output)
     data = re.sub(r"SSID \d+", "SSID", data)
@@ -48,3 +48,15 @@ def get_networks_data() -> list[dict]:
             network_list.append(new_network)
             new_network = {}
     return network_list
+
+
+def disconnect():
+    """断开wlan连接"""
+    cmd_output = subprocess.run(['netsh', 'wlan', 'disconnect'], shell=True, check=True, text=True, capture_output=True, encoding='gb18030', errors='ignore').stdout
+    return '的断' in cmd_output  # '已成功完成接口“WLAN”的断开连接请求。'
+
+
+def connect(name: str):
+    """连接到name"""
+    cmd_output = subprocess.run(['netsh', 'wlan', 'connect', f'name={name}'], check=True, text=True, capture_output=True, encoding='gb18030', errors='ignore').stdout
+    return '成连' in cmd_output  # '已成功完成连接请求。'

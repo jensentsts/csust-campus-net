@@ -5,16 +5,16 @@ import sys
 import time
 import os
 
-import pywifi
+import wifi_actions
 import requests
-from colorama import Fore, init
+# from colorama import Fore, init
 from tqdm import tqdm
 
-from csust_campus_net_instructions import instructions, info, failed, success, warning
-from csust_campus_net_user import User, load_users_data, user_data_path
+from ccn_instructions import instructions, info, failed, success, warning, waiting
+from ccn_user import User, load_users_data, user_data_path
 
 # 设置
-settings = json.load(open('./settings.json', 'r+'))
+settings = json.load(open('./ccn_settings.json', 'r+'))
 
 # 网络信息
 wlan_info = {
@@ -25,23 +25,23 @@ wlan_info = {
 }
 
 
-# 获取连接状态
 def is_network_ok(success_info=False) -> bool:
+    """获取连接状态"""
     global settings
     try:
         network_test_data = requests.get(url=settings['net']['test']['url'], timeout=settings['net']['timeout']).text
     except requests.RequestException:
         return False
+    # 若在测试信息中找到了鉴别内容
     if settings['net']['test']['label'] in network_test_data:
         if success_info:
             success('当前可以正常上网!')
-
         return True
     return False
 
 
-# 获取网络信息
 def wlan_info_update() -> bool:
+    """获取网络信息"""
     global wlan_info
     global settings
     try:
@@ -64,8 +64,8 @@ def wlan_info_update() -> bool:
     return True
 
 
-# post data
 def campus_net_post_data(user: User) -> dict:
+    """post数据"""
     return {
         'DDDDD': ',0,{}'.format(user.account),
         'upass': '{}'.format(user.password),
@@ -78,8 +78,8 @@ def campus_net_post_data(user: User) -> dict:
     }
 
 
-# 向校园网中的特定网址发送post请求
 def campus_net_post_particular_url(url_label: str, data: dict):
+    """向校园网中的特定网址发送post请求"""
     post_url = settings['net'][url_label].format(
         wlanacip=wlan_info['acip'],
         wlanacname=wlan_info['acname'],
@@ -88,104 +88,60 @@ def campus_net_post_particular_url(url_label: str, data: dict):
     return requests.post(url=post_url, data=data)
 
 
-# 校园网注销
 def campus_net_logout(user: User):
+    """校园网注销"""
     try:
         campus_net_post_particular_url(url_label='logout_url', data=campus_net_post_data(user=user))
     except requests.RequestException:
-        failed(Fore.LIGHTYELLOW_EX + f'{user.username}',
-               Fore.RESET + '从校园网',
-               Fore.LIGHTYELLOW_EX + f'{user.campus_net_ssid}',
-               Fore.RESET + '注销失败!')
+        failed(f'[yellow]{user.username}', '从校园网', f'[yellow]{user.campus_net_ssid}', '注销失败!')
 
     else:
         status = is_network_ok()
         if not status:
-            success(Fore.LIGHTYELLOW_EX + f'{user.username}',
-                    Fore.RESET + '已从校园网',
-                    Fore.LIGHTYELLOW_EX + f'{user.campus_net_ssid}',
-                    Fore.RESET + '注销.')
+            success(f'[yellow]{user.username}', '已从校园网', f'[yellow]{user.campus_net_ssid}', '注销.')
 
 
-# 校园网登录
 def campus_net_login(user: User) -> bool:
+    """校园网登录"""
     try:
         request_message = campus_net_post_particular_url(url_label='login_url', data=campus_net_post_data(user=user))
     except requests.RequestException:
-        failed(Fore.RESET + '网络错误,',
-               Fore.LIGHTYELLOW_EX + f'{user.username}',
-               Fore.RESET + '无法登录到',
-               Fore.LIGHTYELLOW_EX + f'{user.campus_net_ssid}',
-               Fore.RESET + '!')
+        failed('网络错误,', f'[yellow]{user.username}', '无法登录到', f'[yellow]{user.campus_net_ssid}', '!')
     else:
         login_key_data = request_message.text.split('<title>')[-1].split('</title>')[0]
         if 'aW51c2UsIGxvZ2luIGFnYWlu' in request_message.url:  # 针对 "inuse, login again" 的登录冲突情况
-            info(Fore.LIGHTYELLOW_EX + f'{user.username}',
-                 Fore.RESET + '在',
-                 Fore.LIGHTYELLOW_EX + f'{user.campus_net_ssid}',
-                 Fore.RESET + '上重复登陆, 即将注销账号...')
+            info(f'[yellow]{user.username}', '在', f'[yellow]{user.campus_net_ssid}', '上重复登陆, 即将注销账号...')
 
             campus_net_logout(user)
             return campus_net_login(user)  # 长理校园网的注销页面非常管用，绝对不怕爆栈的，而且注销之后的登录一般很管用
         elif '成功' in login_key_data:
-            success(Fore.LIGHTYELLOW_EX + f'{user.username}',
-                    Fore.RESET + '已成功登陆',
-                    Fore.LIGHTYELLOW_EX + f'{user.campus_net_ssid}',
-                    Fore.RESET + '!')
-
+            success(f'[yellow]{user.username}', '已成功登陆', f'[yellow]{user.campus_net_ssid}', '!')
             return True
         else:
-            failed(Fore.LIGHTYELLOW_EX + f'{user.username}',
-                   Fore.RESET + '账号密码错误、不在服务区内或网络抽风, 尝试登录到',
-                   Fore.LIGHTYELLOW_EX + f'{user.campus_net_ssid}',
-                   Fore.RESET + '失败!')
+            failed(f'[yellow]{user.username}', '账号密码错误、不在服务区内或网络抽风, 尝试登录到', f'[yellow]{user.campus_net_ssid}', '失败!')
             return False
 
 
-# 连接到ssid
-def wifi_connect_ssid(ssid: str) -> bool:
-    wifi = pywifi.PyWiFi()
-    ifa = wifi.interfaces()[0]
-    profile = pywifi.Profile()
-    profile.ssid = ssid
-    profile.auth = pywifi.const.AUTH_ALG_OPEN
-    profile.akm.append(pywifi.const.AKM_TYPE_NONE)
-
-    ifa.disconnect()
-    tmp_profile = ifa.add_network_profile(profile)
-    ifa.connect(tmp_profile)
-    time.sleep(3)
-    if ifa.status() == pywifi.const.IFACE_CONNECTED:
-        return True
-    return False
-
-
-# wifi连接
 def wifi_connect(user: User, timeout=settings['net']['timeout']):
+    """wifi连接"""
     info('建立wifi连接...')
 
     for try_times in range(timeout, 0, -1):
-        if wifi_connect_ssid(ssid=user.campus_net_ssid):
-            success('已连接至wifi',
-                    Fore.LIGHTYELLOW_EX + f'{user.campus_net_ssid}',
-                    Fore.RESET + '!')
-
+        if wifi_actions.get_interfaces_data()['SSID'] != user.campus_net_ssid and wifi_actions.connect(name=user.campus_net_ssid):
+            success('已连接至wifi', f'[yellow]{user.campus_net_ssid}', '!')
             break
         else:
-            failed(f'{user.campus_net_ssid} 连接失败! 剩余重试次数 {try_times} .')
+            failed(f'[yellow]{user.campus_net_ssid}', '连接失败! 剩余重试次数', f'[yellow]{try_times} .')
 
 
-# 用户登录，包括建立wifi连接和重复尝试登录到校园网
 def user_login(user: User, timeout=settings['net']['timeout']) -> bool:
+    """用户登录，包括建立wifi连接和重复尝试登录到校园网"""
     global settings
-    info('当前用户:',
-         Fore.LIGHTYELLOW_EX + f'{user.username}')
+    info('当前用户:', f'[yellow]{user.username}')
     if settings['log']['show_account']:
-        info('账号:',
-             Fore.LIGHTYELLOW_EX + f'{user.account}')
+        info('账号:', f'[yellow]{user.account}')
     if settings['log']['show_password']:
-        info('密码:',
-             Fore.LIGHTYELLOW_EX + f'{user.password}')
+        info('密码:', f'[yellow]{user.password}')
 
     # wifi连接
     if settings['net']['auto_connection']:
@@ -194,7 +150,7 @@ def user_login(user: User, timeout=settings['net']['timeout']) -> bool:
         info('跳过wifi自动连接.')
 
     # 网络信息获取
-    info('获取网络信息中...')
+    waiting('获取网络信息中')
 
     for try_times in range(timeout, 0, -1):
         if wlan_info_update():
@@ -213,14 +169,14 @@ def user_login(user: User, timeout=settings['net']['timeout']) -> bool:
     for try_times in range(timeout, 0, -1):
         if is_network_ok(success_info=True):
             return True
-        info(f'正在尝试登录 {user.campus_net_ssid} , 剩余重试次数 {try_times}...')
-
+        info(f'正在尝试登录', '[yellow]{user.campus_net_ssid}', ', 剩余重试次数 {try_times}...')
         if campus_net_login(user):
             return True
     return False
 
 
 def login() -> bool:
+    """登录到网络"""
     users = load_users_data(path=user_data_path)
     if len(users) != 0:
         for user_data in users:
@@ -236,9 +192,6 @@ def login() -> bool:
         return False
     # 缺少用户信息
     else:
-        failed('请在',
-               Fore.LIGHTYELLOW_EX + user_data_path,
-               Fore.RESET + '中添加用户信息.')
-
-        os.startfile(user_data_path)  # 打开文件
+        failed('请在', f'[yellow]{user_data_path}', '中添加用户信息.')
+        os.startfile(user_data_path)  # 打开数据文件
         return is_network_ok(success_info=True)

@@ -1,8 +1,7 @@
 # coding=utf-8
 import pandas as pd
-import sys
 
-user_data_path = sys.path[0] + r'\csust_campus_net_user_data.xlsx'
+user_data_path = './ccn_user_data.xlsx'
 
 
 # 用户类
@@ -17,20 +16,22 @@ class User:
     campus_net_ssid: str
 
     def __init__(self):
+        """用户"""
         self.username = 'Unnamed'  # 用户名，此处指的不是登录校园网用的账户名，仅仅是显示在软件内部的名称，不作登录用
         self.account = '000000000000'  # 校园网登录账号
         self.password = '000000'  # 校园网登录密码
         self.campus_net_ssid = 'csust-xx'  # 校园网网络名称
 
     def set_data(self, data: dict):
+        """设定数据"""
         self.username = data['username']
         self.account = data['account']
         self.password = data['password']
         self.campus_net_ssid = data['campus_net_ssid']
 
 
-# 读取用户数据
 def load_users_data(path=user_data_path) -> list[User]:
+    """从.xlsx文件中读取用户数据"""
     data = []
     try:
         with open(path, mode='r', encoding='utf-8') as f:
