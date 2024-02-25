@@ -1,17 +1,13 @@
 # coding=utf-8
 import json
-import re
-import sys
-import time
 import os
+import re
 
-import wifi_actions
 import requests
-# from colorama import Fore, init
-from tqdm import tqdm
 
-from ccn_instructions import instructions, info, failed, success, warning, waiting
+from ccn_instructions import info, failed, success, panel, rule
 from ccn_user import User, load_users_data, user_data_path
+from wifi_actions import get_networks_data, get_interfaces_data, disconnect, connect
 
 # 设置
 settings = json.load(open('./ccn_settings.json', 'r+'))
@@ -26,6 +22,7 @@ wlan_info = {
 
 
 def is_network_ok(success_info=False) -> bool:
+
     """获取连接状态"""
     global settings
     try:
@@ -45,10 +42,13 @@ def wlan_info_update() -> bool:
     global wlan_info
     global settings
     try:
-        wlan_info_url = str(
-            requests.get(url=settings['net']['wlan_info_request_url'], allow_redirects=False,
-                         timeout=settings['net']['timeout']).headers['Location']).split('&')
+        r = requests.get(url=settings['net']['wlan_info_request_url'], allow_redirects=False, timeout=settings['net']['timeout'])
+        wlan_info_url = str(r.headers['Location']).split('&')
     except requests.RequestException:
+        return False
+    except KeyError as e:
+        rule('连接失败')
+        failed('网络信息获取失败：可能是您的某些网络设置导致校园网服务器拒绝了您的请求。')
         return False
     for wlan_info_expression in wlan_info_url:
         if 'wlanuserip' in wlan_info_expression:
@@ -107,6 +107,7 @@ def campus_net_login(user: User) -> bool:
         request_message = campus_net_post_particular_url(url_label='login_url', data=campus_net_post_data(user=user))
     except requests.RequestException:
         failed('网络错误,', f'[yellow]{user.username}', '无法登录到', f'[yellow]{user.campus_net_ssid}', '!')
+        return False
     else:
         login_key_data = request_message.text.split('<title>')[-1].split('</title>')[0]
         if 'aW51c2UsIGxvZ2luIGFnYWlu' in request_message.url:  # 针对 "inuse, login again" 的登录冲突情况
@@ -122,26 +123,42 @@ def campus_net_login(user: User) -> bool:
             return False
 
 
-def wifi_connect(user: User, timeout=settings['net']['timeout']):
+def wifi_connect(user: User):
     """wifi连接"""
     info('建立wifi连接...')
 
-    for try_times in range(timeout, 0, -1):
-        if wifi_actions.get_interfaces_data()['SSID'] != user.campus_net_ssid and wifi_actions.connect(name=user.campus_net_ssid):
-            success('已连接至wifi', f'[yellow]{user.campus_net_ssid}', '!')
-            break
-        else:
-            failed(f'[yellow]{user.campus_net_ssid}', '连接失败! 剩余重试次数', f'[yellow]{try_times} .')
+    reconnect_try_times = settings['net']['reconnect_try_times']  # 重新连接的次数
+    wlan_list = get_networks_data()  # wifi列表
+    exist_flag = False  # 判断所处网络环境中是否存在 user.campus_net_ssid 的标记
+    for wlan in wlan_list:
+        if wlan['SSID'] == user.campus_net_ssid:
+            exist_flag = True
+    if exist_flag:
+        for reconnect_try_times in range(reconnect_try_times, 0, -1):
+            interfaces = get_interfaces_data()
+            for interface in interfaces:
+                wifi_connect_status = False  # wifi连接状态，用于判定和输出是否连接成功的信息
+                if interface['SSID'] != user.campus_net_ssid:
+                    wifi_connect_status = disconnect() and connect(name=user.campus_net_ssid)
+                else:
+                    wifi_connect_status = True
+
+                if wifi_connect_status:
+                    success('已连接至wifi', f'[yellow]{user.campus_net_ssid}', '!')
+                    return
+                else:
+                    failed(f'[yellow]{user.campus_net_ssid}', '连接失败! 剩余重试次数', f'[yellow]{reconnect_try_times} .')
+    else:
+        failed(f'[yellow]{user.campus_net_ssid}', '连接失败! 您所处的网络环境中不包含', f'[yellow]{user.campus_net_ssid}')
 
 
 def user_login(user: User, timeout=settings['net']['timeout']) -> bool:
     """用户登录，包括建立wifi连接和重复尝试登录到校园网"""
     global settings
     info('当前用户:', f'[yellow]{user.username}')
-    if settings['log']['show_account']:
-        info('账号:', f'[yellow]{user.account}')
-    if settings['log']['show_password']:
-        info('密码:', f'[yellow]{user.password}')
+    if settings['log']['show_account_data']:
+        panel(f'账号：[yellow]{user.account}[/yellow]\n密码：[yellow]{user.password}[/yellow]',
+              title='账户信息')
 
     # wifi连接
     if settings['net']['auto_connection']:
@@ -149,18 +166,15 @@ def user_login(user: User, timeout=settings['net']['timeout']) -> bool:
     else:
         info('跳过wifi自动连接.')
 
-    # 网络信息获取
-    waiting('获取网络信息中')
-
     for try_times in range(timeout, 0, -1):
         if wlan_info_update():
-            if settings['log']['show_wlan_info']:
-                info(f'路由器网关地址: {wlan_info["userip"]}')
-                info(f'连接路由器型号: {wlan_info["acname"]}')
-                info(f'用户IP地址: {wlan_info["acip"]}')
-                info(f'路由器MAC地址: {wlan_info["acip"]}')
             success('网络信息获取成功!')
-
+            if settings['log']['show_wlan_info']:
+                panel(f'路由器网关地址: {wlan_info["userip"]}\n'
+                      f'连接路由器型号: {wlan_info["acname"]}\n'
+                      f'用户IP地址: {wlan_info["acip"]}\n'
+                      f'路由器MAC地址: {wlan_info["acip"]}',
+                      title='网络信息')
             break
         else:
             failed(f'网络信息获取失败! 剩余重试次数 {try_times} .')

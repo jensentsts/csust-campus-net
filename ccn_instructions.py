@@ -1,7 +1,7 @@
 # coding=utf-8
-
+from rich.panel import Panel
 from rich.text import Text
-from rich.console import Console
+from rich.console import Console, ConsoleRenderable, RichCast
 from ccn_user import user_data_path
 
 
@@ -13,28 +13,29 @@ def rule(title: str | Text = ''):
     __console.rule(title=title)
 
 
-def waiting(status: str | Text = ''):
-    return __console.status(status, spinner='simpleDots')
-
-
 def info(*values: object):
     """提示信息"""
-    __console.log('INFO: ', *values)
+    __console.log('INFO:', *values)
 
 
 def success(*values: object):
     """成功信息"""
-    __console.log('[green]SUCCESS: ', *values)
+    __console.log('[green]SUCCESS:', *values)
 
 
 def warning(*values: object):
     """警告信息"""
-    __console.log('[yellow]WARNING: ', *values)
+    __console.log('[yellow]WARNING:', *values)
 
 
 def failed(*values: object):
     """失败信息"""
-    __console.log('[red]FAILED: ', values)
+    __console.log('[red]FAILED:', *values)
+
+
+def panel(content: ConsoleRenderable | RichCast | str, title: str = ''):
+    """面板"""
+    __console.print(Panel(content, title=title))
 
 
 def instructions():
