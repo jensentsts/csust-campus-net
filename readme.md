@@ -1,6 +1,8 @@
 # 长沙理工大学校园网自动登录器
 ![Language](https://img.shields.io/github/languages/top/jensentsts/csust-campus-net) ![License](https://img.shields.io/github/license/jensentsts/csust-campus-net) 
 
+![CSUST](https://www.csust.edu.cn/images/logo.png)
+
 本项目基于[https://github.com/linfangzhi/CSUST_network_auto_login/tree/master](https://github.com/linfangzhi/CSUST_network_auto_login/tree/master)二次开发，联网成功后会再次提示本项目的开源信息。感谢学长的项目，学弟在研究过程中省了不少麻烦。
 
 此工具旨在让电脑方便快捷地连接到万年不优化登录过程的学校校园网。
