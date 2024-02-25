@@ -1,7 +1,7 @@
 # 长沙理工大学校园网自动登录器
 ![Language](https://img.shields.io/github/languages/top/jensentsts/csust-campus-net) ![License](https://img.shields.io/github/license/jensentsts/csust-campus-net) 
 
-<div align="center"><img src="https://bkimg.cdn.bcebos.com/pic/d8f9d72a6059252df4af0a753b9b033b5bb5b902?x-bce-process=image/resize,m_lfit,w_536,limit_1/quality,Q_70"></div>
+![CSUST](https://bkimg.cdn.bcebos.com/pic/d8f9d72a6059252df4af0a753b9b033b5bb5b902?x-bce-process=image/resize,m_lfit,w_536,limit_1/quality,Q_70)
 
 本项目基于[https://github.com/linfangzhi/CSUST_network_auto_login/tree/master](https://github.com/linfangzhi/CSUST_network_auto_login/tree/master)二次开发，联网成功后会再次提示本项目的开源信息。感谢学长的项目，学弟在研究过程中省了不少麻烦。
 
@@ -54,8 +54,8 @@
 - 自测稳定，不确定其他状况下是否能正常运行。
 
 ## todos
-- 账号密码正误消息提示。
-- 使用体验优化
-- 优化说明文件
-- 自动注册windows服务并隐藏到后台
-- release一个打包后的文件
+- [ ] 账号密码正误消息提示
+- [ ] 使用体验优化
+- [ ] 优化说明文件
+- [ ] release一个打包后的文件
+- [ ] 提供较为灵活的使用方法（如命令行参数）
