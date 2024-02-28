@@ -1,0 +1,13 @@
+{
+  "log": true,
+  "net": {
+    "wlan_connection": true,
+    "keep_inspect_delay": 60,
+    "timeout": 3,
+    "retry_times": 3,
+    "test": {
+      "url": "https://www.baidu.com/",
+      "label": "baidu"
+    }
+  }
+}
