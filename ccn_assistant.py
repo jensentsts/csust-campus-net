@@ -115,20 +115,20 @@ class CCN_Assistant:
             wlan_list = [wlan['SSID'] for wlan in get_networks_data()]
         interfaces = get_interfaces_data()
 
-        self.__interactions.update(timeout=timeout)
-        self.__log('wlanacip', self.__interactions.wlanacip)
-        self.__log('wlanacname', self.__interactions.wlanacname)
-        self.__log('wlanuserip', self.__interactions.wlanuserip)
-        self.__log('wlanusermac', self.__interactions.wlanusermac)
-
         for user in self.__users_list:
             for times in range(retry_times, 0, -1):
+                self.__interactions.update(timeout=timeout)
+                self.__log('wlanacip', self.__interactions.wlanacip)
+                self.__log('wlanacname', self.__interactions.wlanacname)
+                self.__log('wlanuserip', self.__interactions.wlanuserip)
+                self.__log('wlanusermac', self.__interactions.wlanusermac)
                 # wlan
                 if wlan_connection:
                     if 'SSID' not in interfaces[0] or interfaces[0]['SSID'] != user.ssid and user.ssid in wlan_list:
                         self.__log('connecting...')
                         disconnect()
                         connect(user.ssid)
+                        continue
                 # CCN
                 res: bool | None = self.__interactions.act(user.login(), timeout)
                 if res is None:
