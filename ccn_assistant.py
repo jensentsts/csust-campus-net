@@ -121,21 +121,21 @@ class CCN_Assistant:
         self.__log('wlanusermac', self.__interactions.wlanusermac)
 
         for user in self.__users_list:
-            for times in range(0, retry_times, -1):
+            for times in range(retry_times, 0, -1):
                 # wlan
                 if wlan_connection:
-                    if get_interfaces_data()[0] != user.ssid and user.ssid in wlan_list:
+                    if get_interfaces_data()[0]['SSID'] != user.ssid and user.ssid in wlan_list:
                         disconnect()
                         connect(user.ssid)
                 # CCN
                 res: bool | None = self.__interactions.act(user.login(), timeout)
-                if res:
-                    # 若成功登录，直接结束登录尝试并返回 True
-                    return True
                 if res is None:
                     # 尝试退出，在下一次循环中重试
                     self.__interactions.act(user.logout(), timeout)
                     continue
+                if res:
+                    # 若成功登录，直接结束登录尝试并返回 True
+                    return True
         return False
 
     def keep_inspect(self):
@@ -147,6 +147,7 @@ class CCN_Assistant:
 
         def is_network_ok():
             """网络连接是否正常"""
+            return False
             try:
                 return test_label in requests.get(test_url, timeout=timeout).text
             except requests.RequestException:
