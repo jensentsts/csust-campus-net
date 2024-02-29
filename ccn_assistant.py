@@ -113,6 +113,7 @@ class CCN_Assistant:
         wlan_list: list[str] = []
         if wlan_connection:
             wlan_list = [wlan['SSID'] for wlan in get_networks_data()]
+        interfaces = get_interfaces_data()
 
         self.__interactions.update(timeout=timeout)
         self.__log('wlanacip', self.__interactions.wlanacip)
@@ -124,7 +125,8 @@ class CCN_Assistant:
             for times in range(retry_times, 0, -1):
                 # wlan
                 if wlan_connection:
-                    if get_interfaces_data()[0]['SSID'] != user.ssid and user.ssid in wlan_list:
+                    if 'SSID' not in interfaces[0] or interfaces[0]['SSID'] != user.ssid and user.ssid in wlan_list:
+                        self.__log('connecting...')
                         disconnect()
                         connect(user.ssid)
                 # CCN
