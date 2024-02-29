@@ -147,7 +147,6 @@ class CCN_Assistant:
 
         def is_network_ok():
             """网络连接是否正常"""
-            return False
             try:
                 return test_label in requests.get(test_url, timeout=timeout).text
             except requests.RequestException:
