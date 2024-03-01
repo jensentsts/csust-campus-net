@@ -4,7 +4,7 @@
 # @File    : ccn_user.py
 # @Description : 长理校园网用户类
 
-from .action import Action
+from .action import ActionLog, ActionWifi
 
 
 class User:
@@ -35,14 +35,20 @@ class User:
         }
 
     @data.setter
-    def data(self, value: dict):
+    def data(self, value: dict[str, str]):
         self.__account = value['account']
         self.__password = value['password']
         self.__ccn_ssid = value['ccn_ssid']
 
-    def login(self) -> Action:
-        return Action('login', self.__account, self.__password)
+    def login(self) -> ActionLog:
+        return ActionLog('login', self.__account, self.__password)
 
-    def logout(self) -> Action:
-        return Action('logout', self.__account, self.__password)
+    def logout(self) -> ActionLog:
+        return ActionLog('logout', self.__account, self.__password)
+
+    def wlan_connect(self) -> ActionWifi:
+        return ActionWifi('wlan_connect', self.__ccn_ssid)
+
+    def wlan_disconnect(self) -> ActionWifi:
+        return ActionWifi('wlan_disconnect', self.__ccn_ssid)
 

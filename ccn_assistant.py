@@ -14,18 +14,19 @@ import json
 from wifi_actions import get_networks_data, get_interfaces_data, connect, disconnect
 
 SETTINGS_DEFAULT = {
-  "log": True,
-  "net": {
-    "wlan_connection": True,
-    "keep_inspect_delay": 60,
-    "timeout": 3,
-    "retry_times": 3,
-    "test": {
-      "url": "https://www.baidu.com/",
-      "label": "baidu"
+    "log": True,
+    "net": {
+        "wlan_connection": True,
+        "keep_inspect_delay": 60,
+        "timeout": 3,
+        "retry_times": 3,
+        "test": {
+            "url": "https://www.baidu.com/",
+            "label": "baidu"
+        }
     }
-  }
 }
+
 
 class CCN_Assistant:
     __users_list: list[User]
@@ -42,13 +43,24 @@ class CCN_Assistant:
         try:
             with open('./settings.json', 'r') as fp:
                 self.__settings = json.load(fp)
-        except FileExistsError | FileNotFoundError as e:
+        except FileExistsError as e:
             with open('./settings.json', 'w') as fp:
                 json.dump(SETTINGS_DEFAULT, fp)
+                self.__settings = SETTINGS_DEFAULT
+        except FileNotFoundError as e:
+            with open('./settings.json', 'w') as fp:
+                json.dump(SETTINGS_DEFAULT, fp)
+                self.__settings = SETTINGS_DEFAULT
 
     def __log(self, *args):
         if self.__settings['log']:
             self.__console.log(*args)
+
+    def __show_user(self, user:User, index: int | None = None):
+        if index is not None:
+            self.__log(f'{index}\t{user.data["account"]}: {user.data["ccn_ssid"]}, {user.data["password"]}')
+        else:
+            self.__log(f'{user.data["account"]}: {user.data["ccn_ssid"]}, {user.data["password"]}')
 
     def load(self, users_data_fp: str | TextIOWrapper | list[dict]):
         """
@@ -92,56 +104,93 @@ class CCN_Assistant:
         with open('./settings.json', 'w') as fp:
             json.dump(self.__settings, fp)
 
-    def user_logout(self, index: int):
+    def __wlan_update(self, user: User):
+        timeout: int = self.__settings['net']['timeout']
+        retry_times: int = self.__settings['net']['retry_times']
+        for times in range(retry_times, 0, -1):
+            if self.__interactions.act(user.wlan_connect()):
+                self.__show_user(user)
+                self.__log(user.data['ccn_ssid'])
+                break
+            time.sleep(3)
+        self.__interactions.ccn_update(timeout=timeout)
+        self.__log('wlanacip', self.__interactions.wlanacip)
+        self.__log('wlanacname', self.__interactions.wlanacname)
+        self.__log('wlanuserip', self.__interactions.wlanuserip)
+        self.__log('wlanusermac', self.__interactions.wlanusermac)
+
+    def user_logout(self, user: int | User, wlan_connection: bool) -> bool:
         """
-        # 测试中
         用户退出登录
-        :param index: 索引
+        :param user: User 对象 或 user索引
+        :param wlan_connection: 是否需要wlan连接
         :return:
         """
-        self.__interactions.act(self.__users_list[index].logout())
+        timeout: int = self.__settings['net']['timeout']
+        if type(user) is int:
+            user = self.__users_list[user]
+        # wlan
+        if wlan_connection:
+            self.__wlan_update(user)
+        # 不知道为什么，学校的退出登录一向非常管事，即使是尚未登录的账号也能正常跳转到注销登录页面。所以不需要retry_times.
+        self.__interactions.act(user.logout(), timeout=timeout)
+        return True  # 必定会成功！直接返回 True 就可以了！根本不用担心！（注释于2024.03.01 20:45）
+
+    def user_login(self, user: int | User, wlan_connection: bool) -> bool:
+        """
+        用户登录
+        :param user: User 对象
+        :param wlan_connection: 是否需要wlan连接
+        :return:
+        """
+        timeout: int = self.__settings['net']['timeout']
+        retry_times: int = self.__settings['net']['retry_times']
+
+        if type(user) is int:
+            user = self.__users_list[user]
+        # wlan
+        if wlan_connection:
+            self.__wlan_update(user)
+        # ccn log in
+        for times in range(retry_times, 0, -1):
+            try:
+                statue: None | bool = self.__interactions.act(user.login(), timeout=timeout)
+                if statue is None:
+                    self.user_logout(user, wlan_connection)
+                    continue
+                if statue:
+                    return True
+            except BaseException as e:
+                self.__log(e)
+                return False
+            time.sleep(3)
+        return False
 
     def users_login(self) -> bool:
         """
         所有用户尝试登录
         :return: 是否有一个用户登陆成功
         """
-        timeout: int = self.__settings['net']['timeout']
-        retry_times: int = self.__settings['net']['retry_times']
         wlan_connection: bool = self.__settings['net']['wlan_connection']
 
-        wlan_list: list[str] = []
-        if wlan_connection:
-            wlan_list = [wlan['SSID'] for wlan in get_networks_data()]
-        interfaces = get_interfaces_data()
-
-        for user in self.__users_list:
-            for times in range(retry_times, 0, -1):
-                self.__interactions.update(timeout=timeout)
-                self.__log('wlanacip', self.__interactions.wlanacip)
-                self.__log('wlanacname', self.__interactions.wlanacname)
-                self.__log('wlanuserip', self.__interactions.wlanuserip)
-                self.__log('wlanusermac', self.__interactions.wlanusermac)
-                # wlan
-                if wlan_connection:
-                    if 'SSID' not in interfaces[0] or interfaces[0]['SSID'] != user.ssid and user.ssid in wlan_list:
-                        self.__log('connecting...')
-                        disconnect()
-                        connect(user.ssid)
-                        continue
-                # CCN
-                res: bool | None = self.__interactions.act(user.login(), timeout)
-                if res is None:
-                    # 尝试退出，在下一次循环中重试
-                    self.__interactions.act(user.logout(), timeout)
-                    continue
-                if res:
-                    # 若成功登录，直接结束登录尝试并返回 True
+        for index, user in enumerate(self.__users_list):
+            try:
+                if self.user_login(user, wlan_connection):
                     return True
+            except ConnectionRefusedError:  # AC认证失败会抛出 ConnectionRefusedError
+                self.user_logout(user, wlan_connection)
+            except ValueError as e:
+                self.__log(e)
+                self.__show_user(user=user, index=index)
+                return False
+            finally:
+                time.sleep(3)
         return False
 
-    def keep_inspect(self):
-        """保持对网络的检测"""
+    def keep_inspecting(self):
+        """
+        保持对网络的检测
+        """
         test_url: str = self.__settings['net']['test']['url']
         test_label: str = self.__settings['net']['test']['label']
         timeout: int = self.__settings['net']['timeout']
@@ -156,11 +205,15 @@ class CCN_Assistant:
 
         while True:
             if is_network_ok() or self.users_login():
-                self.__log('Success')
+                self.__log('[green]Success')
                 time.sleep(delay)
             else:
-                self.__log('Failed')
+                self.__log('[red]Failed')
                 time.sleep(3)
+
+    def list_users(self):
+        for index, user in enumerate(self.__users_list):
+            self.__show_user(user=user, index=index)
 
     @property
     def user(self) -> list[User]:
