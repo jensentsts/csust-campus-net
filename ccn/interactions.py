@@ -107,7 +107,7 @@ class Interactions:
                     self.__wlanacname = val
                 if var_name == 'wlanusermac':
                     self.__wlanusermac = '-'.join(re.findall(r'\w{1,2}', val[:12]))
-        except requests.RequestException as e:
+        except BaseException as e:
             return self.read_wlan_config()
         # 网络错误，则读取上一次成功后保存的信息
         if req_msg.status_code >= 400:
