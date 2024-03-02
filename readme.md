@@ -3,7 +3,7 @@
 
 ![CSUST](https://bkimg.cdn.bcebos.com/pic/d8f9d72a6059252df4af0a753b9b033b5bb5b902?x-bce-process=image/resize,m_lfit,w_536,limit_1/quality,Q_70)
 
-本项目基于[https://github.com/linfangzhi/CSUST_network_auto_login/tree/master](https://github.com/linfangzhi/CSUST_network_auto_login/tree/master)二次开发，联网成功后会再次提示本项目的开源信息。感谢学长的项目，学弟在研究过程中省了不少麻烦。
+本项目基于[https://github.com/linfangzhi/CSUST_network_auto_login/tree/master](https://github.com/linfangzhi/CSUST_network_auto_login/tree/master)二次开发。感谢学长的项目，学弟在研究过程中省了不少麻烦。
 
 此工具旨在让电脑方便快捷地连接到万年不优化登录过程的学校校园网。
 
@@ -110,7 +110,7 @@
 
 如果你通过命令行调用CCN，那么您将可以更加灵活地使用您的账号。
 
-*此条目*
+*此功能完善中*
 
 ## 其它
 

@@ -54,13 +54,7 @@ class Interactions:
                 self.__wlanacname = wlan_config['wlanacname']
                 self.__wlanuserip = wlan_config['wlanuserip']
                 self.__wlanusermac = wlan_config['wlanusermac']
-        except FileNotFoundError as e:
-            return False
-        except FileExistsError as e:
-            return False
-        except json.decoder.JSONDecodeError as e:
-            return False
-        except IndexError as e:
+        except (FileNotFoundError, FileNotFoundError, json.decoder.JSONDecodeError, IndexError) as e:
             return False
         return True
 
@@ -82,9 +76,7 @@ class Interactions:
             }
             with open(path, 'w') as fp:
                 json.dump(wlan_config, fp)
-        except FileNotFoundError as e:
-            return False
-        except FileExistsError as e:
+        except (FileNotFoundError, FileExistsError) as e:
             return False
         return True
 
@@ -106,8 +98,9 @@ class Interactions:
                 if var_name == 'wlanacname':
                     self.__wlanacname = val
                 if var_name == 'wlanusermac':
-                    self.__wlanusermac = '-'.join(re.findall(r'\w{1,2}', val[:12]))
-        except BaseException as e:
+                    # self.__wlanusermac = '-'.join(re.findall(r'\w{1,2}', val[:12]))
+                    self.__wlanusermac = '-'.join(val[i:i+2] for i in range(0, 11, 2))
+        except (requests.RequestException, ValueError) as e:
             return self.read_wlan_config()
         # 网络错误，则读取上一次成功后保存的信息
         if req_msg.status_code >= 400:
@@ -120,7 +113,7 @@ class Interactions:
         try:
             self.__wlans_list: list[str] = [wlan['SSID'] for wlan in get_networks_data()]
             self.__interfaces_list: list[dict] = get_interfaces_data()
-        except Exception as e:
+        except IndexError as e:
             return False
         return True
 
@@ -154,12 +147,12 @@ class Interactions:
                 # 所以这里就通过正则表达式来获取标题内容。
                 keywords: str = ''.join(re.findall(r'<title>(.*?)</title>', req_msg.text))
                 # 如果是特殊登录状态，他们会在url里加入参数ErrMsg=[错误代码]，通常是Base64编码，也可能会用缩写。
-                if self.__INUSE_LOGIN_AGAIN_BASE64 in req_msg.url:
-                    # "Inuse, login again" 的重复登录情况
-                    return False
-                elif '成功' in keywords:
+                if '成功' in keywords:
                     # 登录成功
                     return True
+                elif self.__INUSE_LOGIN_AGAIN_BASE64 in req_msg.url:
+                    # "Inuse, login again" 的重复登录情况
+                    raise ConnectionRefusedError('“Inuse, login again”，账号退出并重进即可。')
                 elif self.__USERID_ERROR1_BASE64 in req_msg.url:
                     # 账号错误的情况
                     raise ValueError('账号错误')
@@ -169,7 +162,7 @@ class Interactions:
                 elif self.__AC_AUTHENTICATION_ERROR_CODE in req_msg.url:
                     # AC认证失败
                     # 这个没什么大不了的，直接退出重进就可以了。
-                    raise ConnectionRefusedError('“AC认证失败。”账号退出并重进即可。')
+                    raise ConnectionRefusedError('“AC认证失败”，账号退出并重进即可。')
                 return False
             except requests.RequestException:
                 return None

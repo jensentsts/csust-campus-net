@@ -43,11 +43,7 @@ class CCN_Assistant:
         try:
             with open('./settings.json', 'r') as fp:
                 self.__settings = json.load(fp)
-        except FileExistsError as e:
-            with open('./settings.json', 'w') as fp:
-                json.dump(SETTINGS_DEFAULT, fp)
-                self.__settings = SETTINGS_DEFAULT
-        except FileNotFoundError as e:
+        except (FileExistsError, FileNotFoundError) as e:
             with open('./settings.json', 'w') as fp:
                 json.dump(SETTINGS_DEFAULT, fp)
                 self.__settings = SETTINGS_DEFAULT
@@ -82,8 +78,46 @@ class CCN_Assistant:
         for user in users_list:
             self.__users_list.append(User(user))
 
-    def add_user(self, user: User):
+    def add_user(self, user: User) -> bool:
+        """
+        添加用户
+        :param user: 新用户
+        :return:
+        """
+        for u in self.__users_list:
+            if u.data == user.data:
+                return False
         self.__users_list.append(user)
+        return True
+
+    def edit_user(self, user: User) -> bool:
+        """
+        编辑用户信息
+        :param user: 用户
+        :return:
+        """
+        for u in self.__users_list:
+            if u.data['account'] == user.data['account']:
+                u.data['password'] = user.data['password']
+                u.data['ccn_ssid'] = user.data['ccn_ssid']
+                return True
+        return False
+
+    def remove_user(self, user: User | int) -> bool:
+        """
+        移除用户
+        :param user: 用户
+        :return:
+        """
+        if type(user) is int:
+            if user < len(self.__users_list):
+                self.__users_list.remove(self.__users_list[user])
+                return True
+            return False
+        for u in self.__users_list:
+            if u.data == user.data:
+                self.__users_list.remove(u)
+        return False
 
     def save(self, users_data_fp: str | TextIOWrapper):
         """
@@ -177,7 +211,8 @@ class CCN_Assistant:
             try:
                 if self.user_login(user, wlan_connection):
                     return True
-            except ConnectionRefusedError:  # AC认证失败会抛出 ConnectionRefusedError
+            except ConnectionRefusedError as e:  # AC认证失败会抛出 ConnectionRefusedError
+                self.__log(e)
                 self.user_logout(user, wlan_connection)
             except ValueError as e:
                 self.__log(e)
@@ -211,9 +246,16 @@ class CCN_Assistant:
                 self.__log('[red]Failed')
                 time.sleep(3)
 
-    def list_users(self):
-        for index, user in enumerate(self.__users_list):
-            self.__show_user(user=user, index=index)
+    def list_users(self, user: User | int | None = None):
+        self.__log('[bright_white]Users List')
+        if user is None:
+            for index, user in enumerate(self.__users_list):
+                self.__show_user(user=user, index=index)
+        else:
+            if type(user) is User:
+                self.__show_user(user=user, index=None)
+            if type(user) is int:
+                self.__show_user(user=self.__users_list[user], index=user)
 
     @property
     def user(self) -> list[User]:
