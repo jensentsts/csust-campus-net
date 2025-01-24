@@ -3,8 +3,7 @@
 # @Author  : jensentsts
 # @File    : ccn_user.py
 # @Description : 长理校园网用户类
-
-from .action import ActionLog, ActionWifi
+import typing
 
 
 class User:
@@ -12,7 +11,8 @@ class User:
     __password: str  # 密码
     __ccn_ssid: str  # 校园网 SSID
 
-    def __init__(self, data: dict | None = None):
+    def __init__(self,
+                 data: dict[str, str] | None = None):
         if data is None:
             self.__account = ''
             self.__password = ''
@@ -22,33 +22,53 @@ class User:
             self.__password = data['password']
             self.__ccn_ssid = data['ccn_ssid']
 
-    @property
-    def ssid(self) -> str:
+    def get_account(self) -> str:
+        return self.__account
+
+    def set_account(self,
+                    account: str) -> typing.Self:
+        self.__account = account
+        return self
+
+    def get_password(self) -> str:
+        return self.__password
+
+    def set_password(self,
+                     psw: str) -> typing.Self:
+        self.__password = psw
+        return self
+
+    def get_ssid(self) -> str:
         return self.__ccn_ssid
 
-    @property
-    def data(self) -> dict:
+    def set_ssid(self,
+                 ccn_ssid: str) -> typing.Self:
+        self.__ccn_ssid = ccn_ssid
+        return self
+
+    def get_dict(self) -> dict:
         return {
             'account': self.__account,
             'password': self.__password,
             'ccn_ssid': self.__ccn_ssid,
         }
 
-    @data.setter
-    def data(self, value: dict[str, str]):
+    def set_data(self,
+                 value: dict[str, str]) -> typing.Self:
         self.__account = value['account']
         self.__password = value['password']
         self.__ccn_ssid = value['ccn_ssid']
+        return self
 
-    def login(self) -> ActionLog:
-        return ActionLog('login', self.__account, self.__password)
-
-    def logout(self) -> ActionLog:
-        return ActionLog('logout', self.__account, self.__password)
-
-    def wlan_connect(self) -> ActionWifi:
-        return ActionWifi('wlan_connect', self.__ccn_ssid)
-
-    def wlan_disconnect(self) -> ActionWifi:
-        return ActionWifi('wlan_disconnect', self.__ccn_ssid)
+    def get_param(self) -> dict:
+        return {
+            'DDDDD': ',0,{0}'.format(self.__account),
+            'upass': '{0}'.format(self.__password),
+            'R1': '0',
+            'R2': '0',
+            'R3': '0',
+            'R6': '0',
+            'para': '00',
+            '0MKKey': '123456',
+        }
 

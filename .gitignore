@@ -1,7 +1,7 @@
 ### Python template
 
 users.json
-wlan_config.json
+address_data.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

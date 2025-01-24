@@ -1,1 +1,1 @@
-{"log": true, "net": {"wlan_connection": true, "keep_inspect_delay": 60, "timeout": 3, "retry_times": 3, "test": {"url": "https://www.baidu.com/", "label": "baidu"}}}
+{"title": "\u6821\u56ed\u7f51\u52a9\u624b", "user": {"default": 0}, "net": {"timeout": 3, "test": {"url": "https://www.baidu.com/", "label": "baidu"}}, "keep_mode": {"delay": 45}}

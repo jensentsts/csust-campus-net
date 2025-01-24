@@ -4,6 +4,5 @@
 # @File    : __init__.py
 # @Description :
 
-from .action import *
 from .user import *
-from .interactions import *
+from .ccn import *
