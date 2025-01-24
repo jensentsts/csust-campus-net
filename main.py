@@ -37,12 +37,9 @@ def arg_parse():
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
         while True:
-            if core.net_statue_test():
-                time.sleep(core.settings['keep_mode']['delay'])
-                continue
-            else:
+            if not core.net_statue_test():
                 core.login(core.settings['user']['default'])
-                time.sleep(core.settings['keep_mode']['delay'])
+            time.sleep(core.settings['keep_mode']['delay'])
 
     args: argparse.Namespace = arg_parse()
     u: int = core.settings['user']['default']
