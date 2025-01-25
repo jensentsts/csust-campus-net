@@ -22,6 +22,9 @@ class User:
             self.__password = data['password']
             self.__ccn_ssid = data['ccn_ssid']
 
+    def __repr__(self) -> str:
+        return f'account: {self.__account}\n'
+
     def get_account(self) -> str:
         return self.__account
 
