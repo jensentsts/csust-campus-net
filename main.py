@@ -48,7 +48,7 @@ if __name__ == '__main__':
                     print(f'{ccn_core.get_users()[u]} 请求登录失败，正在重试。')
                     continue
                 else:
-                    print(f'{ccn_core.get_users()[u]} 请求登录成功，正在重试。')
+                    print(f'{ccn_core.get_users()[u]} 请求登录成功。')
             else:
                 print(f'可正常访问网络。')
             time.sleep(ccn_core.settings['keep_mode']['delay'])
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                     print(f'{ccn_core.get_users()[u]} 请求登录失败，正在重试。')
                     continue
                 else:
-                    print(f'{ccn_core.get_users()[u]} 请求登录成功，正在重试。')
+                    print(f'{ccn_core.get_users()[u]} 请求登录成功。')
             else:
                 print(f'可正常访问网络。')
             time.sleep(ccn_core.settings['keep_mode']['delay'])
