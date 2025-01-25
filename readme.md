@@ -8,6 +8,8 @@
 
 本项目基于 [https://github.com/linfangzhi/CSUST_network_auto_login/tree/master](https://github.com/linfangzhi/CSUST_network_auto_login/tree/master) 二次开发，旨在让电脑方便快捷地连接到万年不优化的校园网。
 
+下载链接：[Github Releases](https://github.com/jensentsts/csust-campus-net/releases/)下的Latest，下载`CCN.zip`。喜欢的话烦请加一个`Star`，向您的同学推荐它，谢谢您。
+
 # 特点
 
 ## 支持多账号
@@ -91,7 +93,7 @@
 
 ```json
 {
-  "log": true,  /* 是否打印日志 */
+  "title": "校园网助手",  /* 是否打印日志 */
   "user": {  /* 用户相关配置 */
     "default": 0  /* 默认用户序号 */
   },

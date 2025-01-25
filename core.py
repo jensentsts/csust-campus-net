@@ -153,11 +153,11 @@ class Core:
         """ 用户登录 """
         for counter in range(0, self.ccn.timeout):
             try:
-                self.ccn.login(self.__users[user_index])
                 if self.ccn.statue:
                     break
+                self.ccn.login(self.__users[user_index])
             except (AcAuthenticationError, InuseLoginAgainError):
-                self.ccn.logout(self.__users[user_index])
+                self.ccn.logout(self.__users[user_index]).login(self.__users[user_index])
                 continue
         return self
 
