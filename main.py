@@ -11,12 +11,20 @@ import time
 
 from core import *
 
-
-ccn_core: Core = Core()
+try:
+    ccn_core: Core = Core()
+except (FileExistsError, FileNotFoundError) as e:
+    print(f'{e}')
+    print(f'重要文件缺失。')
+    exit(0)
+except (AddressDataGetError, AddressDataTimeoutError) as e:
+    print(f'{e}')
+    print(f'获取地址信息出错，也无法读取旧有存储记录。')
+    exit(0)
 
 
 def arg_parse():
-    parser = argparse.ArgumentParser(prog=f'CCN v{CCN_VERSION}', description='CCN助手', epilog='请点击 https://github.com/jensentsts/csust-campus-ne 获得帮助或开源代码')
+    parser = argparse.ArgumentParser(prog=f'{ccn_core.settings["title"]} v{CCN_VERSION}', description='{ccn_core.settings["title"]}', epilog='请点击 https://github.com/jensentsts/csust-campus-ne 获得帮助或开源代码')
 
     parser.add_argument('-k', '-K', '--keep', action='store_true', help='持续重复')
     parser.add_argument('-u', '-U', '--user', type=int, metavar=str(ccn_core.settings['user']['default']), help='持续重复')
@@ -56,7 +64,7 @@ if __name__ == '__main__':
     args: argparse.Namespace = arg_parse()
 
     if args.version:
-        print(f'CCN助手 v{CCN_VERSION}')
+        print(f'{ccn_core.settings["title"]} v{CCN_VERSION}')
 
     if args.user is not None:
         u = int(args.user)

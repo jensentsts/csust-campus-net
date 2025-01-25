@@ -84,16 +84,19 @@ class Core:
                 with open(self.Path.address_data_path, 'w') as fp:
                     json.dump(self.ccn.get_address_data().get_dict(), fp)
                 break
-            except (AddressDataGetError, AddressDataTimeoutError) as e:
+            except (AddressDataGetError, AddressDataTimeoutError) as e_net:
                 # 如果已经获取了 self.ccn.timeout 次而未获得结果，则尝试读取原来存储的文件。
                 if i == self.ccn.timeout - 1:
-                    with open(self.Path.address_data_path, 'r') as fp:
-                        address_data = json.load(fp)
-                        self.ccn.set_address_data(AddressData(wlanacip=address_data['wlanacip'],
-                                                              wlanacname=address_data['wlanacname'],
-                                                              wlanuserip=address_data['wlanuserip'],
-                                                              wlanusermac=address_data['wlanusermac']))
-                    break
+                    try:
+                        with open(self.Path.address_data_path, 'r') as fp:
+                            address_data = json.load(fp)
+                            self.ccn.set_address_data(AddressData(wlanacip=address_data['wlanacip'],
+                                                                  wlanacname=address_data['wlanacname'],
+                                                                  wlanuserip=address_data['wlanuserip'],
+                                                                  wlanusermac=address_data['wlanusermac']))
+                        break
+                    except (FileExistsError, FileNotFoundError) as e_file:
+                        raise e_net
                 else:
                     continue
 
