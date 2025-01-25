@@ -24,22 +24,34 @@ except (AddressDataGetError, AddressDataTimeoutError) as e:
 
 
 def arg_parse():
-    parser = argparse.ArgumentParser(prog=f'{ccn_core.settings["title"]} v{CCN_VERSION}', description='{ccn_core.settings["title"]}', epilog='请点击 https://github.com/jensentsts/csust-campus-ne 获得帮助或开源代码')
+    parser = argparse.ArgumentParser(prog=f'CCN',
+                                     description=f'{ccn_core.settings["title"]} v{CCN_VERSION}',
+                                     epilog='请点击 https://github.com/jensentsts/csust-campus-ne 获得帮助或开源代码')
 
-    parser.add_argument('-k', '-K', '--keep', action='store_true', help='持续重复')
-    parser.add_argument('-u', '-U', '--user', type=int, metavar=str(ccn_core.settings['user']['default']), help='持续重复')
+    parser.add_argument('-k', '-K', '--keep',
+                        action='store_true', help='持续重复')
+    parser.add_argument('-u', '-U', '--user',
+                        type=int,  metavar=str(ccn_core.settings['user']['default']), help='指定用户')
 
-    group = parser.add_argument_group('参数列表')
+    group = parser.add_argument_group('可选的操作（互斥）')
     group = group.add_mutually_exclusive_group()
 
-    group.add_argument('-v', '-V', '--version', action='store_true', help='查看版本号')
-    group.add_argument('-li', '--login', action='store_true', help='登录')
-    group.add_argument('-lo', '--logout', action='store_true', help='退出')
-    # group.add_argument('-a', '-A', '--add', action='store_true', help='添加用户')  # 暂不设
-    # group.add_argument('-r', '-R, '--remove', action='store_true', help='删除用户')  # 暂不设
-    # group.add_argument('-e', '-E', '--edit', action='store_true', help='修改用户数据')  # 暂不设
-    group.add_argument('-c', '-C', '--check', action='store_true', help='查询用户数据')
-    group.add_argument('-l', '-L', '--list', action='store_true', help='查询所有用户数据')
+    group.add_argument('-v', '-V', '--version',
+                       action='store_true', help='查看版本号')
+    group.add_argument('-li', '--login',
+                       action='store_true', help='登录')
+    group.add_argument('-lo', '--logout',
+                       action='store_true', help='退出')
+    group.add_argument('-a', '-A', '--add',
+                       action='store_true', help='添加用户')  # 暂不设
+    group.add_argument('-r', '-R', '--remove',
+                       action='store_true', help='删除用户')  # 暂不设
+    group.add_argument('-e', '-E', '--edit',
+                       action='store_true', help='修改用户数据')  # 暂不设
+    group.add_argument('-c', '-C', '--check',
+                       action='store_true', help='查询用户数据')
+    group.add_argument('-l', '-L', '--list',
+                       action='store_true', help='查询所有用户数据')
 
     return parser.parse_args()
 
