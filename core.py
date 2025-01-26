@@ -42,7 +42,7 @@ class Core:
         users_path: str = './users.json'
 
     def __settings_dump(self):
-        self.ccn.timeout = self.__settings['net']['timeout']
+        self.ccn.set_timeout(self.__settings['net']['timeout'])
 
     def __save(self):
         # 用户数据
@@ -77,7 +77,7 @@ class Core:
         finally:
             self.__settings_dump()
         # address data
-        for i in range(0, self.ccn.timeout):
+        for i in range(0, self.ccn.get_timeout()):
             try:
                 # 获取并存储
                 self.ccn.update_address_data()
@@ -86,7 +86,7 @@ class Core:
                 break
             except (AddressDataGetError, AddressDataTimeoutError) as e_net:
                 # 如果已经获取了 self.ccn.timeout 次而未获得结果，则尝试读取原来存储的文件。
-                if i == self.ccn.timeout - 1:
+                if i == self.ccn.get_timeout() - 1:
                     try:
                         with open(self.Path.address_data_path, 'r') as fp:
                             address_data = json.load(fp)
@@ -114,16 +114,15 @@ class Core:
         return self.__ccn
 
     @property
-    def timeout(self) -> int:
-        return self.ccn.timeout
-
-    @timeout.setter
-    def timeout(self, value: int):
-        self.ccn.timeout = value
-
-    @property
     def settings(self) -> dict:
         return self.__settings
+
+    def get_timeout(self) -> int:
+        return self.ccn.get_timeout()
+
+    def set_timeout(self, value: int) -> typing.Self:
+        self.ccn.set_timeout(value)
+        return self
 
     def get_users(self) -> list[User]:
         """ 获取用户 """
@@ -143,10 +142,10 @@ class Core:
         return self
 
     def get_timeout(self) -> int:
-        return self.ccn.timeout
+        return self.ccn.get_timeout()
 
     def set_timeout(self, timeout) -> typing.Self:
-        self.ccn.__timeout = timeout
+        self.ccn.set_timeout(timeout)
         return self
 
     def login(self, user_index: int) -> typing.Self:
@@ -171,6 +170,6 @@ class Core:
         try:
             label = self.__settings['net']['test']['label']
             url = self.__settings['net']['test']['url']
-            return label in requests.get(url, timeout=self.timeout).text
+            return label in requests.get(url, timeout=self.ccn.get_timeout()).text
         except (requests.RequestException, requests.Timeout):
             return False

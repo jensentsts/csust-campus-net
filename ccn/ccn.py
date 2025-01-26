@@ -170,13 +170,12 @@ class CCN:
         """ 登录状态 """
         return self.__statue
 
-    @property
-    def timeout(self) -> int:
+    def get_timeout(self) -> int:
         return self.__timeout
 
-    @timeout.setter
-    def timeout(self, value: int):
+    def set_timeout(self, value: int) -> typing.Self:
         self.__timeout = value
+        return self
 
     def get_address_data(self) -> AddressData:
         return self.__address_data
