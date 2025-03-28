@@ -2,6 +2,12 @@
 
 ![Language](https://img.shields.io/github/languages/top/jensentsts/csust-campus-net) ![License](https://img.shields.io/github/license/jensentsts/csust-campus-net) 
 
+---
+注意！
+由于校园网登录方式更新，此库暂不可用！
+（难道说……？）
+---
+
 长沙理工大学校园网助手（CSUST Campus Net Assistant, CCN Assistant）
 
 ![CSUST](https://bkimg.cdn.bcebos.com/pic/d8f9d72a6059252df4af0a753b9b033b5bb5b902?x-bce-process=image/resize,m_lfit,w_536,limit_1/quality,Q_70)
@@ -180,10 +186,10 @@ CCN.exe -v
 # TODO
 
 - [x] 重构Python代码
-- [ ] 使用Rust重构
+- [ ] 适应更新后的校园网登录方式
 - [ ] 实现窗口化
 - [ ] 其他平台的部署
 
-# 文档
+# 开发文档
 
 此项未定。
